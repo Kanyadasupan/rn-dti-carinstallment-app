@@ -1,12 +1,140 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import { router, useLocalSearchParams } from "expo-router";
+import React from "react";
+import {
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+
 
 export default function Result() {
+  //เอาค่าพารามิเตอร์ที่ส่งมา เก็บในตัวแปรที่จะเอาไปใช้ใน Component
+  const params = useLocalSearchParams();
+
+  const { downPayment, carPayment, totalInterest, installmentPay } = params;
+
+  const formatCurrency = (amount: string | number) => {
+    return Number(amount).toLocaleString("th-TH", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  };
+
   return (
-    <View>
-      <Text>R</Text>
-    </View>
-  )
+    <ScrollView style={styles.container}>
+      <View style={styles.header}>
+        <Image source={require("@/assets/images/carKey.png")} style={styles.headerImage} />
+        <Text style={styles.headerTitle}>สรุปยอดผ่อนชำระ</Text>
+      </View>
+
+      {/* Card แสดงยอดผ่อนต่อเดือน (Highlight) */}
+      <View style={styles.highlightCard}>
+        <Text style={styles.highlightLabel}>ผ่อนเริ่มต้นเพียง</Text>
+        <Text style={styles.highlightValue}>
+          {formatCurrency(Number(installmentPay))}
+        </Text>
+        <Text style={styles.highlightUnit}>บาท / เดือน</Text>
+      </View>
+
+      {/* Detail List */}
+      <View style={styles.detailContainer}>
+        <View style={styles.row}>
+          <Text style={styles.rowLabel}>เงินดาวน์</Text>
+          <Text style={styles.rowValue}>
+            {formatCurrency(Number(downPayment))} บาท
+          </Text>
+        </View>
+        <View style={styles.divider} />
+        <View style={styles.row}>
+          <Text style={styles.rowLabel}>ดอกเบี้ยรวม</Text>
+          <Text style={[styles.rowValue, { color: "#2563EB" }]}>
+            {formatCurrency(Number(totalInterest))} บาท
+          </Text>
+        </View>
+        <View style={styles.divider} />
+        <View style={styles.row}>
+          <Text style={styles.rowLabel}>จำนวนงวด</Text>
+          <Text style={styles.rowValue}>
+            {formatCurrency(Number(installmentPay))} บาท
+          </Text>
+        </View>
+        <View style={styles.divider} />
+      </View>
+
+      <TouchableOpacity
+        style={styles.homeBtn}
+        onPress={() => router.navigate("/input")}
+      >
+        <Text style={styles.btnText}>คำนวณใหม่</Text>
+      </TouchableOpacity>
+    </ScrollView>
+  );
 }
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+  container: { flex: 1, padding: 20, backgroundColor: "#040442" },
+  header: { alignItems: "center", marginTop: 40, marginBottom: 20 },
+  icon: { width: 80, height: 80, marginBottom: 10 },
+  headerTitle: { fontFamily: "Prompt_700Bold", fontSize: 24, color: "#FFF" },
+  headerImage: { width: 80, height: 80, marginBottom: 10 },
+ 
+  highlightCard: {
+    backgroundColor: "#2563EB",
+    borderRadius: 20,
+    padding: 30,
+    alignItems: "center",
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    elevation: 5,
+  },
+  highlightLabel: {
+    fontFamily: "Prompt_400Regular",
+    color: "#BFDBFE",
+    fontSize: 16,
+  },
+  highlightValue: {
+    fontFamily: "Prompt_700Bold",
+    color: "#FFF",
+    fontSize: 48,
+    marginVertical: 5,
+  },
+  highlightUnit: {
+    fontFamily: "Prompt_400Regular",
+    color: "#FFF",
+    fontSize: 14,
+  },
+ 
+  detailContainer: {
+    backgroundColor: "#FFF",
+    borderRadius: 20,
+    padding: 24,
+    marginBottom: 30,
+  },
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 15,
+  },
+  rowLabel: { fontFamily: "Prompt_400Regular", color: "#64748B", fontSize: 16 },
+  rowValue: { fontFamily: "Prompt_600SemiBold", fontSize: 18 },
+  divider: { height: 1, backgroundColor: "#E2E8F0", marginVertical: 10 },
+  note: {
+    fontFamily: "Prompt_400Regular",
+    color: "#94A3B8",
+    fontSize: 12,
+    textAlign: "center",
+  },
+ 
+  homeBtn: {
+    borderWidth: 1,
+    borderColor: "#FFF",
+    borderRadius: 15,
+    padding: 15,
+    alignItems: "center",
+  },
+  btnText: { fontFamily: "Prompt_600SemiBold", color: "#FFF", fontSize: 16 },
+});

@@ -9,17 +9,52 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Alert,
 } from "react-native";
+import { router } from "expo-router";
 
 const DOWN_PAYMENT = [5, 10, 15, 20, 25, 30, 35];
 const MONTH_OPTION = [24, 36, 48, 60, 72, 84];
 
 export default function Input() {
   const [carPrice, setCarPrice] = useState("");
-  const [carDownPayment, setCarDownPayment] = useState<number | null>(null);
-  const [carMonth, setCarMonth] = useState<number | null>(null);
+  const [carDownPayment, setCarDownPayment] = useState("");
+  const [carMonth, setCarMonth] = useState("");
   const [carInterest, setCarInterest] = useState("");
-  const [carInstallment, setCarInstallment] = useState("");
+
+  const handleCalClick = () => {
+    //Validate
+    if (
+      carPrice === "" ||
+      carDownPayment === "" ||
+      carMonth === "" ||
+      carInterest === ""
+    ) {
+      Alert.alert("กรุณากรอกข้อมูลให้ครบ");
+      return;
+    }
+    //คำนวณ
+    //เงินดาวน์
+    let downPayment = (Number(carPrice) * Number(carDownPayment)) / 100;
+    //ยอดจัด
+    let carPayment = Number(carPrice) - downPayment;
+    //ดอกเบี้ยทั้งหมด
+    let totalInterest =
+      (carPayment * (Number(carInterest) / 100) * Number(carMonth)) / 12;
+    //คำนวณยอดผ่อนต่อเดือน
+    let installmentPay = (carPayment + totalInterest) / Number(carMonth);
+
+    //ส่งผลไปแสดงที่ /result
+    router.push({
+      pathname: "/result",
+      params: {
+        downPayment: downPayment.toFixed(2),
+        carPayment: carPayment.toFixed(2),
+        totalInterest: totalInterest.toFixed(2),
+        installmentPay: installmentPay.toFixed(2),
+      },
+    });
+  };
 
   return (
     <KeyboardAvoidingView
@@ -51,17 +86,19 @@ export default function Input() {
                     key={item}
                     style={[
                       styles.button,
-                      carDownPayment === item && styles.buttonSelected,
+                      carDownPayment === item.toString() &&
+                        styles.buttonSelected,
                     ]}
-                    onPress={() => setCarDownPayment(item)}
+                    onPress={() => setCarDownPayment(item.toString())}
                   >
                     <Text
                       style={[
                         styles.label,
-                        carDownPayment === item && styles.labelSelected,
+                        carDownPayment === item.toString() &&
+                          styles.labelSelected,
                       ]}
                     >
-                      {item}%
+                      {item} %
                     </Text>
                   </TouchableOpacity>
                 ))}
@@ -74,17 +111,17 @@ export default function Input() {
                     key={item}
                     style={[
                       styles.button,
-                      carMonth === item && styles.buttonSelected,
+                      carMonth === item.toString() && styles.buttonSelected,
                     ]}
-                    onPress={() => setCarMonth(item)}
+                    onPress={() => setCarMonth(item.toString())}
                   >
                     <Text
                       style={[
                         styles.label,
-                        carMonth === item && styles.labelSelected,
+                        carMonth === item.toString() && styles.labelSelected,
                       ]}
                     >
-                      {item}
+                      {item} %
                     </Text>
                   </TouchableOpacity>
                 ))}
@@ -99,7 +136,7 @@ export default function Input() {
                 onChangeText={(text) => setCarInterest(text)}
               ></TextInput>
 
-              <TouchableOpacity style={styles.btncal}>
+              <TouchableOpacity onPress={handleCalClick} style={styles.btncal}>
                 <Text style={styles.labelcal}>คำนวณค่างวด</Text>
               </TouchableOpacity>
             </View>
